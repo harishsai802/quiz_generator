@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Register{% endblock %}
+{% block content %}
+<div class="card form-card">
+    <h2>Create Account</h2>
+    <form method="POST">
+        <label>Register as</label>
+        <select name="role" id="role-select" onchange="toggleRoleFields()">
+            <option value="student">Student</option>
+            <option value="teacher">Teacher</option>
+        </select>
+
+        <label>Name</label>
+        <input type="text" name="name" required>
+
+        <div id="student-fields">
+            <label>UUCMS ID</label>
+            <input type="text" name="uucms_id" placeholder="e.g. U23CS045">
+        </div>
+
+        <div id="teacher-fields" style="display:none;">
+            <label>Email</label>
+            <input type="email" name="email" placeholder="teacher@example.com">
+            <p class="muted">Teacher accounts require admin approval before you can log in.</p>
+        </div>
+
+        <label>Password</label>
+        <div class="password-field">
+            <input type="password" name="password" id="reg-password" required>
+            <button type="button" class="password-toggle" onclick="togglePassword('reg-password', this)" aria-label="Show password">👁️</button>
+        </div>
+
+        <button class="btn btn-block" type="submit">Register</button>
+    </form>
+    <p>Already have an account? <a href="{{ url_for('login') }}">Login</a></p>
+</div>
+
+<script>
+    function toggleRoleFields() {
+        const role = document.getElementById("role-select").value;
+        const studentFields = document.getElementById("student-fields");
+        const teacherFields = document.getElementById("teacher-fields");
+        const uucmsInput = studentFields.querySelector("input");
+        const emailInput = teacherFields.querySelector("input");
+
+        if (role === "student") {
+            studentFields.style.display = "block";
+            teacherFields.style.display = "none";
+            uucmsInput.required = true;
+            emailInput.required = false;
+        } else {
+            studentFields.style.display = "none";
+            teacherFields.style.display = "block";
+            uucmsInput.required = false;
+            emailInput.required = true;
+        }
+    }
+    toggleRoleFields();
+
+    function togglePassword(inputId, btn) {
+        const input = document.getElementById(inputId);
+        const showing = input.type === "text";
+        input.type = showing ? "password" : "text";
+        btn.textContent = showing ? "👁️" : "🙈";
+        btn.setAttribute("aria-label", showing ? "Show password" : "Hide password");
+    }
+</script>
+{% endblock %}

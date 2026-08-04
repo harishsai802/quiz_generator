@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+<div class="index-hero">
+    <div class="index-hero-overlay"></div>
+    <div class="index-hero-content">
+        <img src="{{ url_for('static', filename='images/university-logo.png') }}" alt="University Logo" class="hero-logo">
+        <h1>Online Quiz Portal</h1>
+        <p>Upload PDF notes to auto-generate quizzes, or build them manually. Built-in
+           anti-cheating: tab-switch detection, copy protection, and full violation reports.</p>
+        {% if not session.get('user_id') %}
+        <div class="hero-actions">
+            <a class="btn" href="{{ url_for('register') }}">Get Started</a>
+            <a class="btn btn-outline btn-outline-light" href="{{ url_for('login') }}">Login</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

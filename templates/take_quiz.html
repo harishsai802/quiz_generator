@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}{{ quiz.title }}{% endblock %}
+{% block content %}
+<div id="quiz-warning" class="flash flash-error" style="display:none;"></div>
+
+<div class="timer-bar" id="timer-bar">
+    <span>⏱ Time Remaining: <span id="time-display">--:--</span></span>
+    <span class="muted" style="color:#fff;">{{ quiz.title }}</span>
+</div>
+
+<p class="muted">Do not switch tabs, minimize, or exit full screen. Copying text is disabled.
+Any violation will <strong>regenerate a fresh quiz</strong> with different questions.</p>
+
+<form method="POST" action="{{ url_for('submit_quiz') }}" id="quiz-form">
+    <input type="hidden" name="attempt_id" value="{{ attempt.id }}">
+
+    {% for q in questions %}
+    <div class="card question-card">
+        <p class="q-text"><strong>Q{{ loop.index }}.</strong> {{ q.question_text }}</p>
+        {% for opt in q.options %}
+        <label class="option-label">
+            <input type="radio" name="q_{{ q.id }}" value="{{ opt.letter }}" required>
+            {{ opt.letter }}. {{ opt.text }}
+        </label>
+        {% endfor %}
+    </div>
+    {% endfor %}
+
+    <button class="btn" type="submit">Submit Quiz</button>
+</form>
+
+<script>
+    const ATTEMPT_ID = {{ attempt.id }};
+    const LOG_VIOLATION_URL = "{{ url_for('log_violation') }}";
+    const QUIZ_DURATION_MINUTES = {{ quiz.duration_minutes }};
+</script>
+<script src="{{ url_for('static', filename='js/anti_cheat.js') }}"></script>
+<script src="{{ url_for('static', filename='js/timer.js') }}"></script>
+{% endblock %}

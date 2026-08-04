@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Result{% endblock %}
+{% block content %}
+<div class="card form-card" style="text-align:center;">
+    <h2>{{ quiz.title }} - Result</h2>
+    {% if attempt.status == 'submitted' %}
+        <p class="score">{{ attempt.score }} / {{ attempt.total_questions }}</p>
+        <p class="muted">Submitted at {{ attempt.submitted_at }}</p>
+    {% else %}
+        <p>This attempt is not finished.</p>
+    {% endif %}
+    <a class="btn" href="{{ url_for('student_dashboard') }}">Back to Dashboard</a>
+</div>
+{% endblock %}

@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Reports{% endblock %}
+{% block content %}
+<div class="flex-between">
+    <h2>Violation Summary</h2>
+    <a class="btn btn-outline btn-sm" href="{{ url_for('export_report_csv') }}">⬇ Export Violations CSV</a>
+</div>
+<table class="report-table">
+    <tr><th>Student</th><th>Email</th><th>Total Violations</th></tr>
+    {% for s in summary %}
+    <tr><td>{{ s.student_name }}</td><td>{{ s.email }}</td><td>{{ s.violation_count }}</td></tr>
+    {% else %}
+    <tr><td colspan="3">No violations recorded.</td></tr>
+    {% endfor %}
+</table>
+
+<h2>Detailed Violation Log</h2>
+<table class="report-table">
+    <tr><th>Student</th><th>Quiz</th><th>Type</th><th>Time</th></tr>
+    {% for v in violations %}
+    <tr>
+        <td>{{ v.student_name }} ({{ v.email }})</td>
+        <td>{{ v.quiz_title }}</td>
+        <td><span class="tag">{{ v.violation_type }}</span></td>
+        <td>{{ v.violation_time }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="4">No violations recorded.</td></tr>
+    {% endfor %}
+</table>
+
+<h2>All Quiz Attempts</h2>
+<table class="report-table">
+    <tr><th>Student</th><th>Quiz</th><th>Score</th><th>Status</th><th>Started</th><th>Submitted</th></tr>
+    {% for a in attempts %}
+    <tr>
+        <td>{{ a.student_name }}</td>
+        <td>{{ a.quiz_title }}</td>
+        <td>{{ a.score if a.score is not none else '-' }} / {{ a.total_questions }}</td>
+        <td>{{ a.status }}</td>
+        <td>{{ a.started_at }}</td>
+        <td>{{ a.submitted_at or '-' }}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="6">No attempts yet.</td></tr>
+    {% endfor %}
+</table>
+{% endblock %}
