@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Create Manual Quiz{% endblock %}
+{% block content %}
+<div class="card form-card">
+    <h2>Create Quiz Manually</h2>
+    <form method="POST">
+        <label>Quiz Title</label>
+        <input type="text" name="title" required>
+
+        <label>Class / Section</label>
+        <select name="class_id">
+            <option value="">All Classes (everyone can see this quiz)</option>
+            {% for c in classes %}
+            <option value="{{ c.id }}">{{ c.name }}</option>
+            {% endfor %}
+        </select>
+
+        <label>Questions shown per student attempt</label>
+        <input type="number" name="questions_per_attempt" value="10" min="1" max="100">
+
+        <label>Time limit (minutes)</label>
+        <input type="number" name="duration_minutes" value="15" min="1" max="180">
+
+        <label>Quiz Password <span class="muted">(optional — students must enter this before starting)</span></label>
+        <input type="text" name="quiz_password" placeholder="Leave blank for no password">
+
+        <button class="btn btn-block" type="submit">Create &amp; Add Questions</button>
+    </form>
+</div>
+{% endblock %}

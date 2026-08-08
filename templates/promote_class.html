@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Promote {{ klass.name }}{% endblock %}
+{% block content %}
+<div class="flex-between">
+    <h2>Promote Students — {{ klass.name }}</h2>
+    <a class="btn btn-outline btn-sm" href="{{ url_for('manage_classes') }}">&larr; All Classes</a>
+</div>
+
+<div class="card form-card">
+    <p class="muted">
+        This moves all <strong>{{ student_count }}</strong> student(s) currently in
+        <strong>{{ klass.name }}</strong> into the next semester/section in one click.
+        Their login ID, password, and past quiz scores stay exactly the same — only
+        their class assignment changes, so quizzes for the new class become visible
+        to them right away. <strong>{{ klass.name }}</strong> itself is left empty
+        afterwards (you can delete it from the Classes page if you no longer need it).
+    </p>
+    <form method="POST">
+        <label>Promote into an existing class</label>
+        <select name="target_class_id">
+            <option value="">-- Select a class --</option>
+            {% for c in other_classes %}
+            <option value="{{ c.id }}">{{ c.name }}</option>
+            {% endfor %}
+        </select>
+
+        <label>Or type a new class/semester name</label>
+        <input type="text" name="new_class_name" placeholder="e.g. 4th Sem CSE - A (leave blank if you picked one above)">
+
+        <button class="btn btn-block" type="submit"
+                {% if student_count == 0 %}disabled{% endif %}
+                onclick="return confirm('Promote all {{ student_count }} student(s) out of {{ klass.name }}?');">
+            Promote All Students
+        </button>
+        {% if student_count == 0 %}
+        <p class="muted">This class currently has no students to promote.</p>
+        {% endif %}
+    </form>
+</div>
+{% endblock %}

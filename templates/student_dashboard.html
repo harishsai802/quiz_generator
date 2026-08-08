@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Student Dashboard{% endblock %}
+{% block content %}
+<h2>Available Quizzes</h2>
+<div class="grid">
+    {% for quiz in quizzes %}
+    <div class="card">
+        <h3>{{ quiz.title }} {% if quiz.access_password %}<span title="Password protected">🔒</span>{% endif %}</h3>
+        {% if quiz.class_id %}<p class="muted"><span class="tag">Your Class</span></p>{% endif %}
+        <p class="muted">Source: {{ 'Auto (PDF)' if quiz.source == 'auto_pdf' else 'Manual' }}</p>
+        <p class="muted">Questions per attempt: {{ quiz.questions_per_attempt }}</p>
+        {% if quiz.access_password %}
+            <a class="btn" href="{{ url_for('quiz_access', quiz_id=quiz.id) }}">Enter Password &amp; Start</a>
+        {% else %}
+            <a class="btn" href="{{ url_for('start_quiz', quiz_id=quiz.id) }}">Start Quiz</a>
+        {% endif %}
+    </div>
+    {% else %}
+    <p>No quizzes available yet.</p>
+    {% endfor %}
+</div>
+{% endblock %}

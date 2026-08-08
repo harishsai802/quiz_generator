@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block content %}
+<div class="stats-row">
+    <div class="stat-card"><span class="num">{{ stats.quizzes }}</span><span class="label">Quizzes</span></div>
+    <div class="stat-card"><span class="num">{{ stats.students }}</span><span class="label">Students</span></div>
+    <div class="stat-card"><span class="num">{{ stats.attempts }}</span><span class="label">Attempts</span></div>
+    <div class="stat-card"><span class="num">{{ stats.violations }}</span><span class="label">Violations</span></div>
+    <div class="stat-card"><span class="num">{{ stats.classes }}</span><span class="label">Classes</span></div>
+</div>
+
+{% if pending_teachers_count and pending_teachers_count > 0 %}
+<div class="card" style="border-left:4px solid var(--orange);">
+    <strong>{{ pending_teachers_count }}</strong> teacher registration(s) awaiting your approval.
+    <a class="btn btn-sm" href="{{ url_for('teacher_approvals') }}">Review Now</a>
+</div>
+{% endif %}
+
+<div class="flex-between">
+    <h2>All Quizzes</h2>
+    <div>
+        <a class="btn" href="{{ url_for('upload_pdf') }}">+ Auto Quiz from PDF</a>
+        <a class="btn btn-outline" href="{{ url_for('create_quiz') }}">+ Manual Quiz</a>
+        <a class="btn btn-outline" href="{{ url_for('manage_classes') }}">Manage Classes</a>
+        <a class="btn btn-outline" href="{{ url_for('bulk_register_students') }}">Bulk Register Students</a>
+    </div>
+</div>
+<input type="text" id="quiz-search" placeholder="Search quizzes by title or class..."
+       style="margin-bottom:12px;width:100%;max-width:360px;" oninput="filterQuizzes()">
+<div class="grid" id="quiz-grid">
+    {% for quiz in quizzes %}
+    <div class="card quiz-card" data-title="{{ quiz.title|lower }}" data-class="{{ (quiz.class_name or 'all classes')|lower }}">
+        <h3>{{ quiz.title }} {% if quiz.access_password %}<span title="Password protected">🔒</span>{% endif %}</h3>
+        <p class="muted">Class: {% if quiz.class_name %}<span class="tag">{{ quiz.class_name }}</span>{% else %}<span class="tag">All Classes</span>{% endif %}</p>
+        <p class="muted">Source: {{ 'Auto (PDF)' if quiz.source == 'auto_pdf' else 'Manual' }}</p>
+        <p class="muted">Questions per attempt: {{ quiz.questions_per_attempt }} &middot; Time limit: {{ quiz.duration_minutes }} min</p>
+        <div class="card-actions">
+            <a class="btn btn-outline btn-sm" href="{{ url_for('add_question', quiz_id=quiz.id) }}">Manage Questions</a>
+            {% if session.get('role') == 'admin' or quiz.created_by == session.get('user_id') %}
+                <a class="btn btn-outline btn-sm" href="{{ url_for('edit_quiz', quiz_id=quiz.id) }}">Edit</a>
+                <form method="POST" action="{{ url_for('delete_quiz', quiz_id=quiz.id) }}" style="display:inline;"
+                      onsubmit="return confirm('Delete \'{{ quiz.title }}\'? This cannot be undone.');">
+                    <button class="btn btn-danger btn-sm" type="submit">Delete</button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+    {% else %}
+    <p>No quizzes yet. Create one!</p>
+    {% endfor %}
+</div>
+
+<script>
+function filterQuizzes() {
+    const q = document.getElementById('quiz-search').value.trim().toLowerCase();
+    document.querySelectorAll('#quiz-grid .quiz-card').forEach(card => {
+        const hay = card.dataset.title + ' ' + card.dataset.class;
+        card.style.display = hay.includes(q) ? '' : 'none';
+    });
+}
+</script>
+{% endblock %}

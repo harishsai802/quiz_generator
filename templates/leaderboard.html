@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Leaderboard{% endblock %}
+{% block content %}
+<div class="flex-between">
+    <h2>🏆 Leaderboard</h2>
+    {% if my_rank %}
+    <p class="muted">Your current rank: <strong>#{{ my_rank }}</strong></p>
+    {% endif %}
+</div>
+<p class="muted">Ranked by average score across all submitted quiz attempts.</p>
+
+<form method="GET" class="flex-between" style="margin-bottom:12px;">
+    <label style="margin:0;">Class/Section:
+        <select name="class_id" onchange="this.form.submit()">
+            <option value="all" {% if class_filter == 'all' %}selected{% endif %}>All Classes</option>
+            {% for c in classes %}
+            <option value="{{ c.id }}" {% if class_filter == c.id|string %}selected{% endif %}>{{ c.name }}</option>
+            {% endfor %}
+        </select>
+    </label>
+</form>
+
+<table class="report-table">
+    <tr><th>Rank</th><th>Student</th><th>Attempts</th><th>Avg Score</th><th>Badges</th></tr>
+    {% for r in rows %}
+    <tr {% if session.get('user_id') == r.id %}style="background:var(--orange-light);"{% endif %}>
+        <td>#{{ r.rank }}</td>
+        <td>{{ r.name }}{% if session.get('user_id') == r.id %} <span class="muted">(you)</span>{% endif %}</td>
+        <td>{{ r.attempts_count }}</td>
+        <td>{{ r.avg_percent }}%</td>
+        <td>
+            {% for icon, label in r.badges %}<span title="{{ label }}">{{ icon }}</span> {% endfor %}
+        </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="5">No submitted quiz attempts yet.</td></tr>
+    {% endfor %}
+</table>
+{% endblock %}

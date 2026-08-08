@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Bulk Register Students{% endblock %}
+{% block content %}
+<div class="card form-card">
+    <h2>Bulk Register Students from Excel</h2>
+    <p class="muted">
+        Upload an Excel file (.xlsx) with two columns: <strong>UUCMS ID</strong> and <strong>Name</strong>
+        (a header row is optional — if there's no header, column A is treated as the UUCMS ID and column B as the Name).
+        The UUCMS ID column is detected automatically even if there's an extra S.No/serial column, as long as
+        the header mentions something like "UUCMS", "USN", "Roll No" or "Registration No" — add that header if
+        you're unsure, to be safe.
+    </p>
+    <p class="muted">
+        Each student's login password is generated automatically as the
+        <strong>last 4 digits of their UUCMS ID + the first 4 letters of their name</strong> (lowercase).
+        For example, UUCMS ID <code>U18UZ26S0180</code> and name <code>Rahul</code> → password <code>0180rahu</code>.
+        Their <strong>login ID is always their UUCMS ID</strong> (e.g. <code>U18UZ26S0180</code>), never a plain number.
+    </p>
+    <form method="POST" enctype="multipart/form-data">
+        <label>Class / Section</label>
+        <select name="class_id">
+            <option value="">-- Select an existing class --</option>
+            {% for c in classes %}
+            <option value="{{ c.id }}">{{ c.name }} ({{ c.student_count if c.student_count is defined else '' }})</option>
+            {% endfor %}
+        </select>
+
+        <label>Or create a new class/section</label>
+        <input type="text" name="new_class_name" placeholder="e.g. 3rd Sem CSE - A (leave blank if you picked one above)">
+        <p class="muted" style="margin-top:-8px;">If you type a name here, it's created automatically and used instead of the dropdown.</p>
+
+        <label>Excel File (.xlsx)</label>
+        <input type="file" name="excel_file" accept=".xlsx" required>
+        <button class="btn btn-block" type="submit">Upload &amp; Register</button>
+    </form>
+</div>
+
+{% if results %}
+<div class="card">
+    <div class="flex-between">
+        <h3>Generated Credentials {% if klass %}<span class="tag">{{ klass.name }}</span>{% endif %}</h3>
+        <button class="btn btn-outline btn-sm" type="button" onclick="downloadCSV()">Download as CSV</button>
+    </div>
+    <p class="muted">⚠️ Save or share these credentials now — passwords are hashed in the database and cannot be recovered later.</p>
+    <table class="report-table" id="results-table">
+        <tr><th>UUCMS ID (Login)</th><th>Name</th><th>Password</th><th>Status</th></tr>
+        {% for r in results %}
+        <tr>
+            <td>{{ r.uucms_id }}</td>
+            <td>{{ r.name }}</td>
+            <td>{{ r.password }}</td>
+            <td>{{ r.status }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+<script>
+function downloadCSV() {
+    const table = document.getElementById('results-table');
+    const rows = [];
+    for (const row of table.rows) {
+        const cells = Array.from(row.cells).map(c => '"' + c.textContent.replace(/"/g, '""') + '"');
+        rows.push(cells.join(','));
+    }
+    const blob = new Blob([rows.join('\n')], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'student_credentials.csv';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+}
+</script>
+{% endif %}
+{% endblock %}

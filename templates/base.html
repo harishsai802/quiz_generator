@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}Quiz Portal{% endblock %} | DR. MSBCU</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<header class="site-header">
+    <div class="header-inner">
+        <a href="{{ url_for('index') }}" class="brand-block">
+            <img src="{{ url_for('static', filename='images/university-logo.png') }}" alt="University Logo" class="site-logo">
+        </a>
+        <nav class="nav-links">
+            {% if session.get('user_id') %}
+                {% if session.get('role') in ['admin', 'teacher'] %}
+                    <a href="{{ url_for('admin_dashboard') }}">Dashboard</a>
+                    <a href="{{ url_for('upload_pdf') }}">Auto Quiz</a>
+                    <a href="{{ url_for('create_quiz') }}">Manual Quiz</a>
+                    <a href="{{ url_for('bulk_register_students') }}">Bulk Register Students</a>
+                    <a href="{{ url_for('manage_classes') }}">Classes</a>
+                    <a href="{{ url_for('admin_report') }}">Reports</a>
+                    <a href="{{ url_for('leaderboard') }}">Leaderboard</a>
+                    {% if session.get('role') == 'admin' %}
+                        <a href="{{ url_for('teacher_approvals') }}">Approve Teachers</a>
+                    {% endif %}
+                {% else %}
+                    <a href="{{ url_for('student_dashboard') }}">Dashboard</a>
+                    <a href="{{ url_for('my_results') }}">My Results</a>
+                    <a href="{{ url_for('student_progress') }}">My Progress</a>
+                    <a href="{{ url_for('leaderboard') }}">Leaderboard</a>
+                {% endif %}
+                <a href="{{ url_for('change_password') }}">Change Password</a>
+                <span class="user-chip">👤 {{ session.get('name') }}</span>
+                <a href="{{ url_for('logout') }}" class="nav-btn">Logout</a>
+            {% else %}
+                <a href="{{ url_for('login') }}">Login</a>
+                <a href="{{ url_for('register') }}" class="nav-btn">Teacher Sign Up</a>
+            {% endif %}
+        </nav>
+    </div>
+</header>
+
+<div class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash flash-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+</div>
+
+<footer class="site-footer">
+    <p>Dr. Manmohan Singh Bengaluru City University — Online Quiz Portal</p>
+    <p class="credit">Designed by
+        <a href="https://www.instagram.com/son_of_yuvaraj_?igsh=MWE3bHh5Znp3Z2EyNw==" target="_blank" rel="noopener noreferrer">Sai Harish M </a>
+    </p>
+</footer>
+</body>
+</html>

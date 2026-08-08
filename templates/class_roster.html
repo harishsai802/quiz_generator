@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}{{ klass.name }} Roster{% endblock %}
+{% block content %}
+<div class="flex-between">
+    <h2>{{ klass.name }} — Student Roster</h2>
+    <div>
+        <a class="btn btn-outline btn-sm" href="{{ url_for('promote_class', class_id=klass.id) }}">Promote Whole Class</a>
+        <a class="btn btn-outline btn-sm" href="{{ url_for('export_class_roster', class_id=klass.id) }}">Export Excel</a>
+        <a class="btn btn-outline btn-sm" href="{{ url_for('manage_classes') }}">&larr; All Classes</a>
+    </div>
+</div>
+
+<input type="text" id="roster-search" placeholder="Search by UUCMS ID or name..."
+       style="margin-bottom:12px;width:100%;max-width:360px;" oninput="filterRoster()">
+
+<table class="report-table" id="roster-table">
+    <tr><th>UUCMS ID (Login)</th><th>Name</th><th>Registered</th><th>Actions</th></tr>
+    {% for s in students %}
+    <tr>
+        <td>{{ s.uucms_id }}</td>
+        <td>{{ s.name }}</td>
+        <td>{{ s.created_at }}</td>
+        <td>
+            <form method="POST" action="{{ url_for('reset_student_password', student_id=s.id) }}" style="display:inline;"
+                  onsubmit="return confirm('Reset password for {{ s.name }}? A new auto-generated password will be shown once.');">
+                <button class="btn btn-outline btn-sm" type="submit">Reset Password</button>
+            </form>
+            <button class="btn btn-outline btn-sm" type="button" onclick="toggleMove({{ s.id }})">Move Class</button>
+            <form method="POST" action="{{ url_for('delete_student', student_id=s.id) }}" style="display:inline;"
+                  onsubmit="return confirm('Remove {{ s.name }} ({{ s.uucms_id }})? This also deletes their quiz attempts and cannot be undone.');">
+                <button class="btn btn-danger btn-sm" type="submit">Remove</button>
+            </form>
+            <form method="POST" action="{{ url_for('move_student', student_id=s.id) }}"
+                  id="move-form-{{ s.id }}" style="display:none;margin-top:6px;">
+                <select name="target_class_id">
+                    <option value="">-- Select a class --</option>
+                    {% for c in other_classes %}
+                    <option value="{{ c.id }}">{{ c.name }}</option>
+                    {% endfor %}
+                </select>
+                <input type="text" name="new_class_name" placeholder="or type a new class name">
+                <button class="btn btn-sm" type="submit">Confirm Move</button>
+            </form>
+        </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="4">No students in this class yet.</td></tr>
+    {% endfor %}
+</table>
+
+<script>
+function filterRoster() {
+    const q = document.getElementById('roster-search').value.trim().toLowerCase();
+    const rows = document.querySelectorAll('#roster-table tr');
+    rows.forEach((row, i) => {
+        if (i === 0) return; // header row
+        const text = row.children[0].textContent.toLowerCase() + ' ' + row.children[1].textContent.toLowerCase();
+        row.style.display = text.includes(q) ? '' : 'none';
+    });
+}
+function toggleMove(studentId) {
+    const form = document.getElementById('move-form-' + studentId);
+    form.style.display = form.style.display === 'none' ? 'block' : 'none';
+}
+</script>
+{% endblock %}

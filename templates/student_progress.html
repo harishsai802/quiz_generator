@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}My Progress{% endblock %}
+{% block content %}
+<h2>📈 My Progress</h2>
+
+<div class="stats-row">
+    <div class="stat-card"><span class="num">{{ total_attempts }}</span><span class="label">Quizzes Taken</span></div>
+    <div class="stat-card"><span class="num">{{ avg_percent }}%</span><span class="label">Average Score</span></div>
+    <div class="stat-card"><span class="num">{{ best_percent }}%</span><span class="label">Best Score</span></div>
+    <div class="stat-card">
+        <span class="num">{% if improvement is not none %}{{ '+' if improvement >= 0 else '' }}{{ improvement }}%{% else %}—{% endif %}</span>
+        <span class="label">Recent Trend</span>
+    </div>
+</div>
+
+{% if badges %}
+<div class="card">
+    <h3>Your Badges</h3>
+    <div style="display:flex; gap:16px; flex-wrap:wrap;">
+        {% for icon, label, desc in badges %}
+        <div class="stat-card" style="min-width:150px; background:var(--orange-light); color:var(--maroon-dark);" title="{{ desc }}">
+            <div style="font-size:30px;">{{ icon }}</div>
+            <div class="label" style="color:var(--maroon-dark); font-weight:600;">{{ label }}</div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<div class="card">
+    <h3>Score Trend</h3>
+    {% if chart_data %}
+    <canvas id="progressChart" height="110"></canvas>
+    {% else %}
+    <p class="muted">Attempt a quiz to start seeing your progress here.</p>
+    {% endif %}
+</div>
+
+{% if chart_data %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+<script>
+    const ctx = document.getElementById('progressChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {{ chart_labels | tojson }},
+            datasets: [{
+                label: 'Score %',
+                data: {{ chart_data | tojson }},
+                borderColor: '#7a1f2b',
+                backgroundColor: 'rgba(122,31,43,0.12)',
+                tension: 0.3,
+                fill: true,
+                pointRadius: 4,
+                pointBackgroundColor: '#d9622b'
+            }]
+        },
+        options: {
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%' } } }
+        }
+    });
+</script>
+{% endif %}
+{% endblock %}

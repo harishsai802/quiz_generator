@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Manage Classes{% endblock %}
+{% block content %}
+<div class="card form-card">
+    <h2>Add a Class / Section</h2>
+    <p class="muted">Classes are also created automatically the moment a teacher types a new class name
+        while bulk-registering students — this form is just a shortcut to set one up ahead of time.</p>
+    <form method="POST">
+        <label>Class / Section Name</label>
+        <input type="text" name="name" placeholder="e.g. 3rd Sem CSE - A" required>
+        <button class="btn btn-block" type="submit">Create Class</button>
+    </form>
+</div>
+
+<h2>All Classes</h2>
+<table class="report-table">
+    <tr><th>Class / Section</th><th>Students</th><th>Attempts</th><th>Avg Score</th><th>Created</th><th>Actions</th></tr>
+    {% for c in classes %}
+    <tr>
+        <td>{{ c.name }}</td>
+        <td>{{ c.student_count }}</td>
+        <td>{{ c.attempts_count }}</td>
+        <td>{{ c.avg_percent ~ '%' if c.avg_percent is not none else '—' }}</td>
+        <td>{{ c.created_at }}</td>
+        <td>
+            <a class="btn btn-outline btn-sm" href="{{ url_for('class_roster', class_id=c.id) }}">View Roster</a>
+            <a class="btn btn-outline btn-sm" href="{{ url_for('promote_class', class_id=c.id) }}">Promote</a>
+            <a class="btn btn-outline btn-sm" href="{{ url_for('export_class_roster', class_id=c.id) }}">Export Excel</a>
+            {% if session.get('role') == 'admin' %}
+            <form method="POST" action="{{ url_for('delete_class', class_id=c.id) }}" style="display:inline;"
+                  onsubmit="return confirm('Delete class \'{{ c.name }}\'? This only works if it has no students.');">
+                <button class="btn btn-danger btn-sm" type="submit" {% if c.student_count > 0 %}disabled title="Move students out first"{% endif %}>Delete</button>
+            </form>
+            {% endif %}
+        </td>
+    </tr>
+    {% else %}
+    <tr><td colspan="6">No classes yet. Create one above, or one will be auto-created the first time you bulk-register students.</td></tr>
+    {% endfor %}
+</table>
+{% endblock %}
